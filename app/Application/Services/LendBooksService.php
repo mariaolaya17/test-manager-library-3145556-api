@@ -34,13 +34,15 @@ class LendBooksService
             throw new DuplicateBookInLoan();
         }
 
-        $activeLoans = $this->loanRepository->countActiveLoansForMember($memberId);
-        if ($activeLoans >= 3) {
-            throw new MemberLimitExceeded($activeLoans);
-        }
-
         if ($this->loanRepository->hasOverdueLoansForMember($memberId)) {
             throw new MemberHasOverdue($memberId);
+        }
+
+        $activeLoans = $this->loanRepository->countActiveLoansForMember($memberId);
+        $requestedBooks = count($uniqueBookIds);
+
+        if ($activeLoans + $requestedBooks > 3) {
+            throw new MemberLimitExceeded($activeLoans);
         }
 
         $books = [];
